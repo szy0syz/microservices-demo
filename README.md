@@ -1,5 +1,7 @@
 # microservices-demo
 
+> 纯手工使用 React、Express、Apollo、GraphQL、MySQL、Sequelze、Docker、AWS、terraform 搭建微服务
+
 ## Part O - 架构图
 
 ![flow1](http://cdn.jerryshi.com/gtkj/20200121161420.png)
