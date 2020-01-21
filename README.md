@@ -1,6 +1,6 @@
 # microservices-demo
 
-## Part I
+## Part I - 搭建项目结构
 
 ### listings-service
 
@@ -95,7 +95,7 @@ services:
 
 * `docker-compose up`
 
-## Part II
+## Part II - 使用 sequelize 初始化数据库
 
 分别外开两个数据库的端口，方便测试。
 
