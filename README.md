@@ -1,5 +1,9 @@
 # microservices-demo
 
+## Part O - 架构图
+
+![flow1](http://cdn.jerryshi.com/gtkj/20200121161420.png)
+
 ## Part I - 搭建项目结构
 
 ### listings-service
