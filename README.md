@@ -468,3 +468,73 @@ const listingsResolver = async () => {
 
 export default listingsResolver;
 ```
+
+### users-service 注册用户
+
+- `yarn add uuid bcryptjs`
+
+```js
+// 路由文件 src/server/startServer.js
+const setupRoutes = app => {
+  app.post("/users", async (req, res) => {
+    if (!req.body.email || !req.body.passwor) {
+      return next(new Error("Invalid body!"));
+    }
+
+    try {
+      const newUser = await User.create({
+        email: req.body.email,
+        id: generateUUID(),
+        passwordHash: hashPassword(req.body.password)
+      });
+
+      return res.json(newUser);
+    } catch (error) {
+      return next(error);
+    }
+  });
+};
+
+
+import uuidv4 from "uuid/v4";
+const generateUUID = () => uuidv4();
+
+
+import bcrypt from "bcryptjs";
+const hashPassword = password => bcrypt.hashSync(password, bcrypt.genSaltSync("41@14"));
+
+
+// src/db/models.js
+export class User extends Model {}
+User.init(
+  {
+    id: {
+      allowNull: false,
+      primaryKey: true,
+      type: DataTypes.UUID
+    },
+    email: {
+      allowNull: false,
+      type: DataTypes.STRING,
+      unique: true
+    },
+    passwordHash: {
+      allowNull: false,
+      type: DataTypes.CHAR(64)
+    }
+  },
+  {
+    defaultScope: {
+      rawAttributes: { exclude: ["passwordHash"] }
+    },
+    modelName: "users",
+    sequelize
+  }
+);
+```
+
+统一处理错误中间件
+
+```js
+
+```
