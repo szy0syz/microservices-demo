@@ -590,3 +590,20 @@ render(<h1>working</h1>, document.getElementById('app'));
   "watch": "parcel --port=7001 src/index.html"
 }
 ```
+
+> 初始化 `<Root />` 根组件
+
+```js
+import React from 'react'
+const Root = () => {
+  return <h1>Root Component</h1>
+}
+export default Root;
+
+
+// 修改 src/index.js
+import React from 'react';
+import { render } from 'react-dom';
+import Root from './components/Root';
+render(<Root />, document.getElementById('app'))
+```
