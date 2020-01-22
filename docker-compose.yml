@@ -1,5 +1,15 @@
 version: "3"
 services:
+  api-gateway:
+    build: "./api-gateway"
+    depends_on:
+      - users-service
+      - listings-service
+    ports:
+      - 7000:7000
+    volumes:
+      - ./api-gateway:/opt/app
+
   listings-service:
     build: "./listings-service"
     depends_on:

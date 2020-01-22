@@ -19,8 +19,8 @@
   },
 ```
 
-```js
-// babel-config.js
+```bash
+## babel-config.js 无法加载，换成 -> .babelrc
 module.exports = {
   plugins: [
     [
@@ -43,7 +43,9 @@ module.exports = {
     ],
   ],
 };
+```
 
+```js
 // src/index.js
 console.log('!!!!working');
 ```
@@ -255,7 +257,7 @@ export default sequelize;
 const cache = {};
 
 const accessEnv = (key, defaultValue) => {
-  if (!(key in ProcessingInstruction.env)) {
+  if (!(key in process.env)) {
     if (defaultValue) return defaultValue;
     throw new Error(`${key} not found in process.env`);
   }
@@ -266,4 +268,166 @@ const accessEnv = (key, defaultValue) => {
 };
 
 export default accessEnv;
+```
+
+新建express路由文件
+
+```js
+// src/server/routes.js
+const setupRoutes = app => {
+  app.get("listings", (_, res) => {
+    return res.json({ message: "hi jerry" });
+  });
+};
+
+// src/server/startServer.js
+
+// ...
+import setupRoutes from "./routes";
+// ...
+setupRoutes(app)
+```
+
+新建 models 文件
+
+```js
+// src/db/models.js
+import { DataTypes, Model } from "sequelize";
+
+import sequelize from "./connection";
+
+export class Listing extends Model {}
+
+Listing.init(
+  {
+    title: {
+      allowNull: false,
+      type: DataTypes.STRING
+    },
+    description: {
+      allowNull: false,
+      type: DataTypes.TEXT
+    }
+  },
+  {
+    modelName: "listings",
+    sequelize
+  }
+);
+```
+
+测试接口
+
+```js
+import { Listing } from "#root/db/models";
+
+const setupRoutes = app => {
+  app.get("/listings", async (_, res) => {
+    const listings = await Listing.findAll();
+    return res.json(listings);
+  });
+};
+```
+
+### api-getway
+
+- `yarn add -D babel-watch`
+- `yarn add -D @babel/core @babel/polyfill @babel/preset-env apollo-server apollo-server-express babel-plugin-module-resolver cookie-parser cors express`
+
+copy `.babelrc`   `Dockerfile`  `package.json`
+
+新增后台启动文件
+
+```js
+// src/server/startServer.js
+import { ApolloServer } from "apollo-server-express";
+import cookieParser from "cookie-parser";
+import cors from 'cors'
+import express from 'express'
+
+import accessEnv from '#root/helpers/accessEnv'
+
+const PORT = accessEnv("PORT", 7000)
+
+
+```
+
+新增 GraphQL 相关文件
+
+```js
+// src/graphql/typeDefs.js
+import { gql } from 'apollo-server'
+const typeDefs = gql`
+  type Listing {
+    description: String!
+    id: ID!
+    title: String!
+  }
+
+  type Query {
+    listings: [Listing!]!
+  }
+`
+export default typeDefs;
+
+
+// src/graphql/resovlers/index.js， 统筹所有 Query Mutation等
+import * as Query from "./Query";
+const resolvers = { Query };
+export default resolvers;
+
+
+// src/graphql/resolvers/Query/index.js，分别统筹自己名下的Query
+export { default as listings } from "./listings";
+
+
+// src/graphql/resolvers/Query/listings.js，自力更生
+const listingsResolver = async () => {
+  return [
+    {
+      description: "desc11111111111",
+      id: 11,
+      title: "title111"
+    }
+  ];
+};
+
+export default listingsResolver;
+```
+
+最后的后端启动文件
+
+```js
+import { ApolloServer } from "apollo-server-express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
+
+import typeDefs from "#root/graphql/typeDefs";
+import resolvers from "#root/graphql/resolvers";
+import accessEnv from "#root/helpers/accessEnv";
+
+const PORT = accessEnv("PORT", 7000);
+
+const apolloServer = new ApolloServer({
+  resolvers,
+  typeDefs
+});
+
+const app = express();
+
+app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: (origin, cb) => cb(null, true),
+    credentials: true
+  })
+);
+
+apolloServer.applyMiddleware({ app, cors: false });
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`API gateway listening on ${PORT}`);
+});
 ```

@@ -16,13 +16,17 @@ module.exports.up = (queryInterface, DataTypes) => {
         allowNull: false,
         type: DataTypes.TEXT
       },
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE
+      },
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE
       },
       deletedAt: {
         allowNull: true,
-        type: DataTypes.TEXT
+        type: DataTypes.DATE
       }
     },
     {
@@ -30,3 +34,5 @@ module.exports.up = (queryInterface, DataTypes) => {
     }
   );
 };
+
+module.exports.down = queryInterface => queryInterface.dropTable("listings");
