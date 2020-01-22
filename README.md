@@ -559,3 +559,34 @@ const apolloServer = new ApolloServer({
   typeDefs,
 });
 ```
+
+## Part V 前端APP
+
+### classifieds-app
+
+- `yarn add -D parcel-bundler`
+
+> `parcel-bundler` 竟然这么厉害，可以自动分析js的依赖并自动安装。
+
+`src/index.html`
+
+```html
+<body>
+  <div id="app"></div>
+  <script src="./index.js"></script>
+</body>
+```
+
+```js
+// src/index.js
+import React from 'react';
+import { render } from 'react-dom';
+
+render(<h1>working</h1>, document.getElementById('app'));
+```
+
+```json
+"scripts": {
+  "watch": "parcel --port=7001 src/index.html"
+}
+```
