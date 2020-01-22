@@ -1,5 +1,5 @@
 import cors from 'cors';
-import express from 'epxress';
+import express from 'express';
 import bodyParser from 'body-parser';
 
 import accessEnv from '#root/helpers/accessEnv';

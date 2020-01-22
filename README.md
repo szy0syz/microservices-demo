@@ -218,7 +218,7 @@ yarn run db:migrate
 
 ## Part III
 
-`yarn add epxress cors body-parser`
+`yarn add express cors body-parser`
 
 修改 `src/index.js` 文件
 

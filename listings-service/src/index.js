@@ -1,4 +1,3 @@
-import '@babel/polyfill';
-
-import '#root/db/connection';
-import '#root/server/startServer';
+require("@babel/polyfill");
+require("#root/db/connection");
+require("#root/server/startServer");
