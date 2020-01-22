@@ -2,6 +2,10 @@
 
 > 纯手工使用 React、Express、Apollo、GraphQL、MySQL、Sequelze、Docker、AWS、terraform 搭建微服务
 
+![img0](http://cdn.jerryshi.com/gtkj/20200122142615.jpg)
+
+> 果真和书上写的一模一样啊。
+
 ## Part O - 架构图
 
 ![flow1](http://cdn.jerryshi.com/gtkj/20200121161420.png)
