@@ -495,11 +495,12 @@ const setupRoutes = app => {
   });
 };
 
-
+// src/helpers/generateUUID
 import uuidv4 from "uuid/v4";
 const generateUUID = () => uuidv4();
 
 
+// src/helpers/hashPassword.js
 import bcrypt from "bcryptjs";
 const hashPassword = password => bcrypt.hashSync(password, bcrypt.genSaltSync("41@14"));
 
@@ -536,5 +537,25 @@ User.init(
 统一处理错误中间件
 
 ```js
+// src/server/formatGraphQLErrors.js
+import _ from 'lodash';
+const formatGraphQLErrors = error => {
+  const errorDetails = _.get(error, 'originalError.response.body');
+  console.log('erroe', error);
+  try {
+    if (errorDetails) return JSON.parse(errorDetails);
+  } catch (e) {
+    return e;
+  }
+  return error;
+};
+export default formatGraphQLErrors;
 
+
+// src/server/startServer.js
+const apolloServer = new ApolloServer({
+  formatError: formatGraphQLErrors,
+  resolvers,
+  typeDefs,
+});
 ```
