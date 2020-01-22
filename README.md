@@ -431,3 +431,36 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`API gateway listening on ${PORT}`);
 });
 ```
+
+## Part IV
+
+### api-gateway
+
+- `yarn add got`
+
+使用适配器(adapter) 向 resolvers 提供服务
+
+```js
+// src/adapters/ListingsService.js
+import got from "got";
+
+const LISTINGS_SERVOCE_URI = "http://listings-service:7100";
+
+export default class ListingsService {
+  static async fetchAllListings() {
+    const body = await got.get(`${LISTINGS_SERVOCE_URI}/listings`).json();
+
+    return body;
+  }
+}
+
+
+// src/graphql/resolvers/Query/listings.js
+import ListingsService from '#root/adapters/ListingsService'
+
+const listingsResolver = async () => {
+  return await ListingsService.fetchAllListings()
+};
+
+export default listingsResolver;
+```
