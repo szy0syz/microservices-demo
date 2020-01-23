@@ -675,3 +675,76 @@ const Root = () => {
 ```
 
 - 管理sessions
+- `yarn add date-fns`
+
+```js
+// src/server/routes.js
+import { addHours } from 'date-fns'
+
+app.post('/sessions', async (req, res, next) => {
+  if (!req.body.email || !req.body.password) {
+    return next(new Error('Invalid body!'));
+  }
+
+  try {
+    const user = await User.findOne({
+      attributes: {},
+      where: {
+        email: req.body.email,
+      },
+    });
+
+    if (!user) return next(new Error('Invalid email!'));
+
+    if (!passwordCompareSync(req.body.password, user.passwordHash)) {
+      return next(new Error('Incorrect password!'));
+    }
+
+    const expiresAt = addHours(new Date(), USER_SESSION_EXPIRY_HOURS);
+    const sessionToken = generateUUID();
+
+    const userSession = await UserSession.create({
+      expiresAt,
+      id: sessionToken,
+      userId: user.id,
+    });
+
+    return res.json(userSession);
+  } catch (error) {
+    next(error);
+  }
+});
+```
+
+- GraphQL 用户登录
+
+```js
+// api-gateway/src/graogql/typeDefs.js
+gql`
+scalar: Date
+
+type Mutation {
+  createUser(email: String!, password: String!): User!
+  createUserSession(email: String!, password: String!): UserSession!
+}
+`
+
+// src/graphql/resolvers/mutation/createUserSession.js
+const createUserSessionReslover = async (_, { email, password }, context) => {
+  const userSession = await UsersService.createUserSession({ email, password });
+
+  context.res.cookie('userSessionId', userSession.id, { httpOnly: true });
+
+  return userSession;
+};
+
+// src/server/startServer.js
+const apolloServer = new ApolloServer({
+  context: c => c,
+  formatError: formatGraphQLErrors,
+  resolvers,
+  typeDefs,
+});
+```
+
+## Part VI
