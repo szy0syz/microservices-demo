@@ -607,3 +607,71 @@ import { render } from 'react-dom';
 import Root from './components/Root';
 render(<Root />, document.getElementById('app'))
 ```
+
+- **使用 style-components 创建全局样式**
+- `yarn add styled-components`
+
+> 还可以初始化 html body #app 不错。
+
+```js
+// src/index.js
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+
+  html, body, #app {
+    height:100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  body {
+    font-family: Roboto, sans-serif;
+  }
+`;
+```
+
+- Root根节点组件创建样式
+
+```js
+const Wrapper = styled.div`
+  box-sizing: border-box;
+  height: 100%;
+  padding: 1rem;
+  width: 100%;
+`;
+
+const Container = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  margin: 0 auto;
+  width: 80rem;
+`;
+
+const Content = styled.div`
+  background-color: red;
+  flex: 1;
+  margin-right: 1rem;
+`;
+
+const Sidebar = styled.div`
+  background-color: blue;
+  flex: 0 auto;
+  width: 10rem;
+`;
+
+const Root = () => {
+  return (
+    <Wrapper>
+      <Container>
+        <Content>Content</Content>
+        <Sidebar>Sidebar</Sidebar>
+      </Container>
+    </Wrapper>
+  );
+};
+```
+
+- 管理sessions
