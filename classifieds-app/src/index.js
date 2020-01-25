@@ -1,8 +1,10 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
-import Root from './components/Root';
+import Root from '~/components/Root';
+
+import * as theme from './theme';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
@@ -20,9 +22,9 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 render(
-  <>
+  <ThemeProvider theme={theme}>
     <GlobalStyle />
     <Root />
-  </>,
+  </ThemeProvider>,
   document.getElementById('app')
 );

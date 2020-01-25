@@ -274,31 +274,31 @@ const accessEnv = (key, defaultValue) => {
 export default accessEnv;
 ```
 
-新建express路由文件
+新建 express 路由文件
 
 ```js
 // src/server/routes.js
 const setupRoutes = app => {
-  app.get("listings", (_, res) => {
-    return res.json({ message: "hi jerry" });
+  app.get('listings', (_, res) => {
+    return res.json({ message: 'hi jerry' });
   });
 };
 
 // src/server/startServer.js
 
 // ...
-import setupRoutes from "./routes";
+import setupRoutes from './routes';
 // ...
-setupRoutes(app)
+setupRoutes(app);
 ```
 
 新建 models 文件
 
 ```js
 // src/db/models.js
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model } from 'sequelize';
 
-import sequelize from "./connection";
+import sequelize from './connection';
 
 export class Listing extends Model {}
 
@@ -306,16 +306,16 @@ Listing.init(
   {
     title: {
       allowNull: false,
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     description: {
       allowNull: false,
-      type: DataTypes.TEXT
-    }
+      type: DataTypes.TEXT,
+    },
   },
   {
-    modelName: "listings",
-    sequelize
+    modelName: 'listings',
+    sequelize,
   }
 );
 ```
@@ -323,10 +323,10 @@ Listing.init(
 测试接口
 
 ```js
-import { Listing } from "#root/db/models";
+import { Listing } from '#root/db/models';
 
 const setupRoutes = app => {
-  app.get("/listings", async (_, res) => {
+  app.get('/listings', async (_, res) => {
     const listings = await Listing.findAll();
     return res.json(listings);
   });
@@ -338,29 +338,27 @@ const setupRoutes = app => {
 - `yarn add -D babel-watch`
 - `yarn add -D @babel/core @babel/polyfill @babel/preset-env apollo-server apollo-server-express babel-plugin-module-resolver cookie-parser cors express`
 
-copy `.babelrc`   `Dockerfile`  `package.json`
+copy `.babelrc` `Dockerfile` `package.json`
 
 新增后台启动文件
 
 ```js
 // src/server/startServer.js
-import { ApolloServer } from "apollo-server-express";
-import cookieParser from "cookie-parser";
-import cors from 'cors'
-import express from 'express'
+import { ApolloServer } from 'apollo-server-express';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
 
-import accessEnv from '#root/helpers/accessEnv'
+import accessEnv from '#root/helpers/accessEnv';
 
-const PORT = accessEnv("PORT", 7000)
-
-
+const PORT = accessEnv('PORT', 7000);
 ```
 
 新增 GraphQL 相关文件
 
 ```js
 // src/graphql/typeDefs.js
-import { gql } from 'apollo-server'
+import { gql } from 'apollo-server';
 const typeDefs = gql`
   type Listing {
     description: String!
@@ -371,28 +369,25 @@ const typeDefs = gql`
   type Query {
     listings: [Listing!]!
   }
-`
+`;
 export default typeDefs;
 
-
 // src/graphql/resovlers/index.js， 统筹所有 Query Mutation等
-import * as Query from "./Query";
+import * as Query from './Query';
 const resolvers = { Query };
 export default resolvers;
 
-
 // src/graphql/resolvers/Query/index.js，分别统筹自己名下的Query
-export { default as listings } from "./listings";
-
+export { default as listings } from './listings';
 
 // src/graphql/resolvers/Query/listings.js，自力更生
 const listingsResolver = async () => {
   return [
     {
-      description: "desc11111111111",
+      description: 'desc11111111111',
       id: 11,
-      title: "title111"
-    }
+      title: 'title111',
+    },
   ];
 };
 
@@ -402,20 +397,20 @@ export default listingsResolver;
 最后的后端启动文件
 
 ```js
-import { ApolloServer } from "apollo-server-express";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import express from "express";
+import { ApolloServer } from 'apollo-server-express';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
 
-import typeDefs from "#root/graphql/typeDefs";
-import resolvers from "#root/graphql/resolvers";
-import accessEnv from "#root/helpers/accessEnv";
+import typeDefs from '#root/graphql/typeDefs';
+import resolvers from '#root/graphql/resolvers';
+import accessEnv from '#root/helpers/accessEnv';
 
-const PORT = accessEnv("PORT", 7000);
+const PORT = accessEnv('PORT', 7000);
 
 const apolloServer = new ApolloServer({
   resolvers,
-  typeDefs
+  typeDefs,
 });
 
 const app = express();
@@ -425,13 +420,13 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: (origin, cb) => cb(null, true),
-    credentials: true
+    credentials: true,
   })
 );
 
 apolloServer.applyMiddleware({ app, cors: false });
 
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`API gateway listening on ${PORT}`);
 });
 ```
@@ -446,9 +441,9 @@ app.listen(PORT, "0.0.0.0", () => {
 
 ```js
 // src/adapters/ListingsService.js
-import got from "got";
+import got from 'got';
 
-const LISTINGS_SERVOCE_URI = "http://listings-service:7100";
+const LISTINGS_SERVOCE_URI = 'http://listings-service:7100';
 
 export default class ListingsService {
   static async fetchAllListings() {
@@ -458,12 +453,11 @@ export default class ListingsService {
   }
 }
 
-
 // src/graphql/resolvers/Query/listings.js
-import ListingsService from '#root/adapters/ListingsService'
+import ListingsService from '#root/adapters/ListingsService';
 
 const listingsResolver = async () => {
-  return await ListingsService.fetchAllListings()
+  return await ListingsService.fetchAllListings();
 };
 
 export default listingsResolver;
@@ -476,16 +470,16 @@ export default listingsResolver;
 ```js
 // 路由文件 src/server/startServer.js
 const setupRoutes = app => {
-  app.post("/users", async (req, res) => {
+  app.post('/users', async (req, res) => {
     if (!req.body.email || !req.body.passwor) {
-      return next(new Error("Invalid body!"));
+      return next(new Error('Invalid body!'));
     }
 
     try {
       const newUser = await User.create({
         email: req.body.email,
         id: generateUUID(),
-        passwordHash: hashPassword(req.body.password)
+        passwordHash: hashPassword(req.body.password),
       });
 
       return res.json(newUser);
@@ -496,14 +490,12 @@ const setupRoutes = app => {
 };
 
 // src/helpers/generateUUID
-import uuidv4 from "uuid/v4";
+import uuidv4 from 'uuid/v4';
 const generateUUID = () => uuidv4();
 
-
 // src/helpers/hashPassword.js
-import bcrypt from "bcryptjs";
-const hashPassword = password => bcrypt.hashSync(password, bcrypt.genSaltSync("41@14"));
-
+import bcrypt from 'bcryptjs';
+const hashPassword = password => bcrypt.hashSync(password, bcrypt.genSaltSync('41@14'));
 
 // src/db/models.js
 export class User extends Model {}
@@ -512,24 +504,24 @@ User.init(
     id: {
       allowNull: false,
       primaryKey: true,
-      type: DataTypes.UUID
+      type: DataTypes.UUID,
     },
     email: {
       allowNull: false,
       type: DataTypes.STRING,
-      unique: true
+      unique: true,
     },
     passwordHash: {
       allowNull: false,
-      type: DataTypes.CHAR(64)
-    }
+      type: DataTypes.CHAR(64),
+    },
   },
   {
     defaultScope: {
-      rawAttributes: { exclude: ["passwordHash"] }
+      rawAttributes: { exclude: ['passwordHash'] },
     },
-    modelName: "users",
-    sequelize
+    modelName: 'users',
+    sequelize,
   }
 );
 ```
@@ -551,7 +543,6 @@ const formatGraphQLErrors = error => {
 };
 export default formatGraphQLErrors;
 
-
 // src/server/startServer.js
 const apolloServer = new ApolloServer({
   formatError: formatGraphQLErrors,
@@ -560,13 +551,13 @@ const apolloServer = new ApolloServer({
 });
 ```
 
-## Part V 前端APP
+## Part V 前端 APP
 
 ### classifieds-app
 
 - `yarn add -D parcel-bundler`
 
-> `parcel-bundler` 竟然这么厉害，可以自动分析js的依赖并自动安装。
+> `parcel-bundler` 竟然这么厉害，可以自动分析 js 的依赖并自动安装。
 
 `src/index.html`
 
@@ -594,18 +585,17 @@ render(<h1>working</h1>, document.getElementById('app'));
 > 初始化 `<Root />` 根组件
 
 ```js
-import React from 'react'
+import React from 'react';
 const Root = () => {
-  return <h1>Root Component</h1>
-}
+  return <h1>Root Component</h1>;
+};
 export default Root;
-
 
 // 修改 src/index.js
 import React from 'react';
 import { render } from 'react-dom';
 import Root from './components/Root';
-render(<Root />, document.getElementById('app'))
+render(<Root />, document.getElementById('app'));
 ```
 
 - **使用 style-components 创建全局样式**
@@ -633,7 +623,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 ```
 
-- Root根节点组件创建样式
+- Root 根节点组件创建样式
 
 ```js
 const Wrapper = styled.div`
@@ -674,12 +664,12 @@ const Root = () => {
 };
 ```
 
-- 管理sessions
+- 管理 sessions
 - `yarn add date-fns`
 
 ```js
 // src/server/routes.js
-import { addHours } from 'date-fns'
+import { addHours } from 'date-fns';
 
 app.post('/sessions', async (req, res, next) => {
   if (!req.body.email || !req.body.password) {
@@ -727,7 +717,7 @@ type Mutation {
   createUser(email: String!, password: String!): User!
   createUserSession(email: String!, password: String!): UserSession!
 }
-`
+`;
 
 // src/graphql/resolvers/mutation/createUserSession.js
 const createUserSessionReslover = async (_, { email, password }, context) => {
@@ -748,3 +738,70 @@ const apolloServer = new ApolloServer({
 ```
 
 ## Part VI
+
+- `styled` 第一层父级选择器 `&` 可省略
+
+```js
+const Lable = styled.label`
+  display: block;
+
+  :not(:first-child) {
+    margin-top: 0.75rem;
+  }
+`;
+```
+
+- 创建公共组件库 `shared`，新建组件 `TextInput`
+
+```js
+// src/components/shared/TextInput.js
+const TextInput = styled.input`
+  box-sizing: border-box;
+  display: block;
+  font-size: 0.9rem;
+  padding: 0.25rem;
+  width: 100%;
+`;
+
+export default TextInput;
+```
+
+- **创建全局样式文件 theme.js**
+
+- `color name & hue` 颜色名称和色调 <https://www.color-blindness.com/color-name-hue/>
+
+```js
+// 创建 src/theme.js
+export const veryLightGray = '#CCCCCC';
+
+// 【修改】 src/index.js
+// ......
+render(
+  <ThemeProvider theme={theme}>
+    <GlobalStyle />
+    <Root />
+  </ThemeProvider>,
+  document.getElementById('app')
+);
+```
+
+```js
+// 最终 Login.js 组件
+<form onSubmit={onSubmit}>
+  <Lable>
+    <LableText>Email</LableText>
+    <TextInput disable={isSumbitting} name="email" type="email" ref={register} />
+  </Lable>
+  <Lable>
+    <LableText>Password</LableText>
+    <TextInput disable={isSumbitting} name="password" type="password" ref={register} />
+    <LoginButton disable={isSumbitting} type="submit">
+      Login
+    </LoginButton>
+  </Lable>
+</form>
+```
+
+### 初始化 `GraphQL`
+
+- `yarn add apollo-cache-inmemory apollo-client apollo-link-http graphql graphql-tag react-apollo @apollo/react-hooks`
