@@ -1,10 +1,11 @@
 import React from 'react';
+import { ApolloProvider } from 'react-apollo';
 import { render } from 'react-dom';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
-import Root from '~/components/Root';
-
 import * as theme from './theme';
+import Root from '~/components/Root';
+import client from '~/api/graphqlClient';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
@@ -22,9 +23,11 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 render(
-  <ThemeProvider theme={theme}>
-    <GlobalStyle />
-    <Root />
-  </ThemeProvider>,
+  <ApolloProvider client={client}>
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+      <Root />
+    </ThemeProvider>
+  </ApolloProvider>,
   document.getElementById('app')
 );

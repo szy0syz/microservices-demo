@@ -13,6 +13,11 @@ export default class UsersService {
     return body;
   }
 
+  static async fetchUser({ userId }) {
+    const body = await got.get(`${USERS_SERVOCE_URI}/users/${userId}`).json();
+    return body;
+  }
+
   static async createUserSession({ email, password }) {
     const body = await got.post(`${USERS_SERVOCE_URI}/sessions`, { json: { email, password } }).json();
     return body;

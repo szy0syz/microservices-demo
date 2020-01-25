@@ -805,3 +805,165 @@ render(
 ### 初始化 `GraphQL`
 
 - `yarn add apollo-cache-inmemory apollo-client apollo-link-http graphql graphql-tag react-apollo @apollo/react-hooks`
+
+```js
+// src/api/graphqlClient.js
+import { ApolloClient } from 'apollo-client';
+import { HttpLink } from 'apollo-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+
+export const cache = new InMemoryCache();
+
+const client = new ApolloClient({
+  cache,
+  link: new HttpLink({
+    credentials: 'include',
+    uri: process.env.SERVICES_URI + '/graphql',
+  }),
+});
+
+export default client;
+```
+
+- 项目根目录创建 `.env` 环境变量文件
+
+```bash
+SERVICE_URI=http://localhost:7000
+```
+
+```js
+// src/index.js
+import { ApolloProvider } from 'react-apollo';
+import client from '~/api/graphqlClient';
+// ......
+render(
+  <ApolloProvider client={client}>
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+      <Root />
+    </ThemeProvider>
+  </ApolloProvider>,
+  document.getElementById('app')
+);
+```
+
+- 修改 Login.js 组件
+
+```js
+// 执行这条语句时发现报错了
+// "message": "Cannot return null for non-nullable field UserSession.user."
+// 原来无法解析 user { eamil id }
+const mutation = gql`
+  mutation($email: String!, $password: String!) {
+    createUserSession(email: $email, password: $password) {
+      id
+      user {
+        email
+        id
+      }
+    }
+  }
+`;
+```
+
+- 补充 `mutation` 里 `createUserSession` 能够解析 `user` 对象
+
+```js
+// api-gateway/adapters/UsersService.js
+import UsersService from '~/adapters/UsersService';
+
+const UserSession = {
+  // 注意：这里的 user 才去对应 mutation-createUserSession 里的 user
+  user: async userSession => {
+    return await UsersService.fetchUser({ userId: userSession.userId });
+  },
+};
+
+export default UserSession;
+```
+
+- 再补充适配器下 src/adapters/UsersService.js 服务里的方法
+
+```js
+// ......
+  static async fetchUser({ userId }) {
+    const body = await got.get(`${USERS_SERVOCE_URI}/users/${userId}`).json();
+    return body;
+  }
+// .......
+```
+
+- 再再补充下具体服务提供者的控制器
+
+```js
+// users-services/src/server/routes.js
+app.get('/users/:userId', async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.userId);
+
+    if (!user) return next(new Error('Invalid user ID'));
+
+    return res.json(user);
+  } catch (error) {
+    return next(error);
+  }
+});
+```
+
+- 最后修改 `resolvers`
+
+```js
+import UserSession from './UserSession';
+
+const resolvers = { Query, Mutation, UserSession };
+```
+
+### 本节解析
+
+1. `typeDefs.js` 里有这么一个 `type`
+
+```js
+  type UserSession {
+    createdAt: Date!
+    expriesAt: Date!
+    id: ID!
+    user: User!
+  }
+```
+
+2. `mutation` 里的 `createUserSessionReslover` 只负责解析 数据库表 `UserSession` 里的数据，不管怎么解析 `type` 里的 `user`
+
+```js
+const createUserSessionReslover = async (_, { email, password }, context) => {
+  const userSession = await UsersService.createUserSession({ email, password });
+
+  context.res.cookie('userSessionId', userSession.id, { httpOnly: true });
+
+  return userSession;
+};
+```
+
+3. 补充 resolvers 登场
+
+```js
+// src/graphql/index.js
+import * as Query from './Query';
+import * as Mutation from './Mutation';
+import UserSession from './UserSession';
+
+const resolvers = { Query, Mutation, UserSession };
+
+export default resolvers;
+
+// src/graphql/resolvers/UserSession.js
+// [对话]: 小弟来帮你解析 `type UserSession` 下的 `user`
+import UsersService from '#root/adapters/UsersService';
+
+const UserSession = {
+  user: async userSession => {
+    return await UsersService.fetchUser({ userId: userSession.userId });
+  },
+};
+
+export default UserSession;
+```
