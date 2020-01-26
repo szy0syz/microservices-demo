@@ -1008,9 +1008,8 @@ app.get('/sessions/:sessionId', async (req, res, next) => {
 });
 ```
 
-- `api-gateway` 创建 `session` 注入中间件
-
 ```js
+// `api-gateway` 创建 `session` 注入中间件
 // api-gateway/src/server/injectSession.js
 import UsersService from '#root/adapters/UsersService';
 
