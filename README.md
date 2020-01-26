@@ -920,7 +920,7 @@ const resolvers = { Query, Mutation, UserSession };
 
 ### 本节解析
 
-1. `typeDefs.js` 里有这么一个 `type`
+**1、** `typeDefs.js` 里有这么一个 `type`
 
 ```js
   type UserSession {
@@ -931,7 +931,7 @@ const resolvers = { Query, Mutation, UserSession };
   }
 ```
 
-2. `mutation` 里的 `createUserSessionReslover` 只负责解析 数据库表 `UserSession` 里的数据，不管怎么解析 `type` 里的 `user`
+**2、** `mutation` 里的 `createUserSessionReslover` 只负责解析 数据库表 `UserSession` 里的数据，不管怎么解析 `type` 里的 `user`
 
 ```js
 const createUserSessionReslover = async (_, { email, password }, context) => {
@@ -943,7 +943,7 @@ const createUserSessionReslover = async (_, { email, password }, context) => {
 };
 ```
 
-3. 补充 resolvers 登场
+**3、** 补充 resolvers 登场，我负责解析 `type UserSession` 里的 `user` 对象！
 
 ```js
 // src/graphql/index.js
@@ -966,4 +966,119 @@ const UserSession = {
 };
 
 export default UserSession;
+```
+
+> 前端使用 async/await 异步函数
+
+在最顶层 index.js 文件加入 `import '@babel/polyfill';`
+
+#### 登录的后端交互
+
+```js
+// classifieds-app/src/components/Login.js
+const [createUserSession] = useMutation(mutation);
+
+const onSubmit = handleSubmit(async ({ email, password }) => {
+  const result = await createUserSession({
+    variables: {
+      email,
+      password,
+    },
+  });
+  console.log(result);
+});
+```
+
+- 新增根据 `sessionId` 查询接口 `API`
+
+```js
+// users-services/src/server/routes.js
+app.get('/sessions/:sessionId', async (req, res, next) => {
+  try {
+    const userSession = await UserSession.findByPk(req.params.sessionId);
+
+    if (!userSession) {
+      return next(new Error('Invalid session Id'));
+    }
+
+    return res.json(userSession);
+  } catch (error) {
+    return next(error);
+  }
+});
+```
+
+- `api-gateway` 创建 `session` 注入中间件
+
+```js
+// api-gateway/src/server/injectSession.js
+import UsersService from '#root/adapters/UsersService';
+
+const injectSession = async (req, res, next) => {
+  if (req.cookies.userSessionId) {
+    const userSession = await UsersService.fetchUserSession({
+      sessionId: req.cookies.userSessionId,
+    });
+    res.locals.userSession = userSession;
+  }
+
+  return next();
+};
+
+export default injectSession;
+
+
+// -----------------
+// ★ api-gateway/src/server/startServer.js
+app.use(cookieParser());
+
+// 注意顺序，肯定要在拿到了 cookie 后再能启动这个中间件
+app.use(injectSession);
+
+apolloServer.applyMiddleware({ app, cors: false });
+
+
+// -----------------
+// 先修改 typeDefs.js
+ userSession(me: Boolean!): UserSession
+
+
+// -----------------
+// 再创建Query解析器 graogql/resolvers/Query/userSession.js
+const userSessionResolver = async (_, args, context) => {
+  if (args.me !== true) throw new Error('Unsupported argument value');
+  return context.res.locals.userSession;
+};
+
+export default userSessionResolver;
+
+
+
+// -----------------
+{
+  userSession(me: false) {
+    id
+    createdAt
+    user {
+      id
+      email
+    }
+  }
+}
+```
+
+#### 从整体框架来看，如何添加新 Query
+
+1. 具体某个服务添加新控制器，如在 `users-services` 里添加新业务控制器
+2. 网关 `api-gateway` adapters 里注册这个接口
+3. `graphql` 的 `typeDes.js` 注册这个 `query`
+
+#### GrapgQL Playground 开启 cookie
+
+- Settings
+
+```json
+{
+  "request.credentials": "include"
+}
 ```
