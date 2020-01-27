@@ -1081,3 +1081,140 @@ export default userSessionResolver;
   "request.credentials": "include"
 }
 ```
+
+## Part VII Redux
+
+- `yarn add redux react-redux`
+
+### 初始化 redux
+
+```js
+// src/store/index.js
+import * as ducks from './ducks';
+import { combineReducers, createStore } from 'redux';
+
+const reducers = combineReducers(ducks);
+const store = createStore(
+  reducers,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
+
+export default store;
+
+// ------------
+// /src/store/ducks/index.js
+// actions
+const CLEAR = 'session/CLEAR';
+const SET = 'session/SET';
+
+const DEFAULT_STATE = null;
+
+// reducer
+const sessionReducer = (state = DEFAULT_STATE, action = {}) => {
+  switch (action.type) {
+    case SET:
+      return action.session;
+    case CLEAR:
+      return null;
+    default:
+      return state;
+  }
+};
+
+export default sessionReducer;
+
+// action creators
+export const setSession = session => {
+  return { session, type: SET };
+};
+
+export const clearSession = () => {
+  return { type: CLEAR };
+};
+
+// -----------
+// src/index.js
+render(
+  <Provider store={store}>
+    <ApolloProvider client={client}>
+      <ThemeProvider theme={theme}>
+        <GlobalStyle />
+        <Root />
+      </ThemeProvider>
+    </ApolloProvider>
+  </Provider>,
+  document.getElementById('app')
+);
+```
+
+### Root 组件新增 cookie 初始化逻辑
+
+> 仅仅只是初始化一个过程而已
+
+```js
+const Root = () => {
+  const dispatch = useDispatch();
+  const [initialised, setInitialised] = useState(false);
+
+  useEffect(() => {
+    graphqlClient.query({ query }).then(({ data }) => {
+      if (data.userSession) {
+        dispatch(setSession(data.userSession));
+      }
+      setInitialised(true);
+    });
+  }, []);
+
+  if (!initialised) return 'Loading...';
+
+  return (
+    <Wrapper>
+      <Container>
+        <Content>Content</Content>
+        <Sidebar>
+          <Login />
+        </Sidebar>
+      </Container>
+    </Wrapper>
+  );
+};
+```
+
+### 构建 AccountDetails 组件
+
+- AccountDetails 组件包含两个子组件：Account 和 Login
+- 如果在 Root 顶层组件换到了 session 时，就显示出 Account 组件
+- 如果 redux 里没有 session 就显示 Login 组件
+- 技巧：useSelector 获取 reudx state
+
+```js
+//
+const AccountDetails = () => {
+  const session = useSelector(state => state.session);
+
+  if (session) return <Account />;
+
+  return <Login />;
+};
+
+// ------------
+const Wrapper = styled.div`
+  color: ${props => props.theme.mortar};
+  font-size: 0.9rem;
+`;
+
+const Email = styled.div`
+  color: ${props => props.theme.nero};
+  font-size: 1.2rem;
+  margin-top: 0.25rem;
+`;
+
+const Account = () => {
+  const session = useSelector(state => state.session);
+  return (
+    <Wrapper>
+      Logged in as <Email>{session.user.email}</Email>
+    </Wrapper>
+  );
+};
+```
