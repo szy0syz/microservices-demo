@@ -1188,7 +1188,7 @@ const Root = () => {
 - 技巧：useSelector 获取 reudx state
 
 ```js
-//
+// src/components/AcountDetails
 const AccountDetails = () => {
   const session = useSelector(state => state.session);
 
@@ -1198,6 +1198,7 @@ const AccountDetails = () => {
 };
 
 // ------------
+// src/components/AcountDetails/Account.js
 const Wrapper = styled.div`
   color: ${props => props.theme.mortar};
   font-size: 0.9rem;
