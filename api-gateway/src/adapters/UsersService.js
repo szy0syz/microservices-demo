@@ -1,11 +1,11 @@
 import got from 'got';
 
-const USERS_SERVOCE_URI = 'http://users-service:7101';
+const USERS_SERVICE_URI = 'http://users-service:7101';
 
 export default class UsersService {
   static async createUser({ email, password }) {
     const body = await got
-      .post(`${USERS_SERVOCE_URI}/users`, {
+      .post(`${USERS_SERVICE_URI}/users`, {
         json: { email, password },
       })
       .json();
@@ -19,12 +19,19 @@ export default class UsersService {
   }
 
   static async fetchUserSession({ sessionId }) {
-    const body = await got.get(`${USERS_SERVOCE_URI}/sessions/${sessionId}`).json();
+    const body = await got.get(`${USERS_SERVICE_URI}/sessions/${sessionId}`).json();
     return body;
   }
 
   static async createUserSession({ email, password }) {
-    const body = await got.post(`${USERS_SERVOCE_URI}/sessions`, { json: { email, password } }).json();
+    const body = await got.post(`${USERS_SERVICE_URI}/sessions`, { json: { email, password } }).json();
+    return body;
+  }
+
+  static async deleteUserSession({ sessionId }) {
+    console.log('adapters ~~ sessionId', sessionId);
+    const body = await got.delete(`${USERS_SERVICE_URI}/sessions/${sessionId}`).json();
+    console.log('adapters ~~ body', body);
     return body;
   }
 }

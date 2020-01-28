@@ -1219,3 +1219,52 @@ const Account = () => {
   );
 };
 ```
+
+## Part Ⅷ
+
+### 登出功能
+
+- users-service 新增删除 session API 接口
+- api-gate 修改 typeDefs.js
+- resolvers 新增 deleteUserSession.js
+- adapters 修改 UsersService.js
+
+```js
+// users-service/src/routes.js
+app.delete('/sessions/:sessionId', async (req, res, next) => {
+  try {
+    const userSession = UserSession.findByPk(req.params.sessionId);
+
+    if (!userSession) return next(new Error('Invalid session Id'));
+
+    await userSession.destroy();
+
+    return res.end();
+  } catch (error) {
+    return next(error);
+  }
+});
+
+
+// ------------
+// src/graphql/resolvers/Mutation/deleteUserSession.js
+import UsersService from '#root/adapters/UsersService.js';
+
+const deleteUserSessionReslover = async (_, { sessionId }, context) => {
+  await UsersService.createUserSession({ sessionId });
+
+  context.res.cleanrCookie('userSessionId');
+
+  return true;
+};
+
+export default deleteUserSessionReslover;
+
+
+// ------------
+// src/adapters/UsersService.js
+static async deleteUserSession({ sessionId }) {
+  const body = await got.delete(`${USERS_SERVOCE_URI}/sessions/${sessionId}`, { json: { sessionId } }).json();
+  return body;
+}
+```
