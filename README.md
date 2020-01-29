@@ -1322,3 +1322,5 @@ const onSubmit = handleSubmit(async ({ email, password }) => {
   dispatch(setSession(createdSession));
 });
 ```
+
+### OrSignUp 注册组件
