@@ -1264,7 +1264,7 @@ export default deleteUserSessionReslover;
 // ------------
 // src/adapters/UsersService.js
 static async deleteUserSession({ sessionId }) {
-  const body = await got.delete(`${USERS_SERVOCE_URI}/sessions/${sessionId}`, { json: { sessionId } }).json();
+  const body = await got.delete(`${USERS_SERVICE_URI}/sessions/${sessionId}`, { json: { sessionId } }).json();
   return body;
 }
 ```

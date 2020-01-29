@@ -45,11 +45,13 @@ const setupRoutes = app => {
     try {
       const userSession = await UserSession.findByPk(req.params.sessionId);
 
-      if (!userSession) return next(new Error('Invalid session ID'));
+      if (!userSession) {
+        return next(new Error('Invalid session ID'));
+      }
 
       await userSession.destroy();
 
-      return res.end();
+      return res.json({});
     } catch (e) {
       return next(e);
     }
@@ -60,7 +62,7 @@ const setupRoutes = app => {
       const userSession = await UserSession.findByPk(req.params.sessionId);
 
       if (!userSession) {
-        return next(new Error('Invalid session Id'));
+        return next(new Error('Invalid session ID'));
       }
 
       return res.json(userSession);
