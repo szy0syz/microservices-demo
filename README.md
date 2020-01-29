@@ -1323,4 +1323,71 @@ const onSubmit = handleSubmit(async ({ email, password }) => {
 });
 ```
 
-### OrSignUp 注册组件
+### 注册
+
+```js
+const mutation = gql`
+  mutation($email: String!, $password: String!) {
+    createUser(email: $email, password: $password) {
+      id
+    }
+  }
+`;
+
+const validationSchema = yup.object().shape({
+  email: yup.string().required(),
+  password: yup
+    .string()
+    .required()
+    .test('sameAsConfirmPassword', '${path} is not the same as the confirmation password', function() {
+      return this.parent.password === this.parent.confirmPassword;
+    }),
+});
+
+const SignUp = ({ onChangeToLogin: pushChangeToLogin }) => {
+  const [createUser] = useMutation(mutation);
+  const {
+    formState: { isSubmitting, isValid },
+    handleSubmit,
+    register,
+    reset,
+  } = useForm({ mode: 'onChange', validationSchema });
+
+  const onSubmit = handleSubmit(async ({ email, password }) => {
+    await createUser({ variables: { email, password } });
+    reset();
+    pushChangeToLogin();
+  });
+
+  return (
+    <form onSubmit={onSubmit}>
+      <Lable>
+        <LableText>Email</LableText>
+        <TextInput disable={isSubmitting} name="email" type="email" ref={register} />
+      </Lable>
+      <Lable>
+        <LableText>Password</LableText>
+        <TextInput disable={isSubmitting} name="password" type="password" ref={register} />
+      </Lable>
+      <Lable>
+        <LableText> Confirm Password</LableText>
+        <TextInput disable={isSubmitting} name="confirmPassword" type="password" ref={register} />
+      </Lable>
+      <SignUpButton disabled={isSubmitting || !isValid} type="submit">
+        Sign Up
+      </SignUpButton> <OrLogin>
+        or{' '}
+        <a
+          href="#"
+          onClick={evt => {
+            evt.preventDefault();
+            pushChangeToLogin();
+          }}
+        >
+          Login
+        </a>
+      </OrLogin>
+    </form>
+  );
+};
+```
