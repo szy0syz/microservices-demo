@@ -1,5 +1,5 @@
 import _got from 'got';
-const got = _got.extend({ retry: 0 }); // responseType: 'json'
+const got = _got.extend({ retry: 0, responseType: 'json' }); //! responseType 竟ß没用？
 
 const USERS_SERVICE_URI = 'http://users-service:7101';
 
@@ -31,7 +31,7 @@ export default class UsersService {
 
   static async deleteUserSession({ sessionId }) {
     // 默认 retry=2， 收到500等错误时会重新连接两次。
-    const body = await got.delete(`${USERS_SERVICE_URI}/sessions/${sessionId}`, { retry: 0 }).json();
+    const body = await got.delete(`${USERS_SERVICE_URI}/sessions/${sessionId}`).json();
     return body;
   }
 }

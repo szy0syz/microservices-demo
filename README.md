@@ -1228,6 +1228,7 @@ const Account = () => {
 - api-gate 修改 typeDefs.js
 - resolvers 新增 deleteUserSession.js
 - adapters 修改 UsersService.js
+- [前端] 登出 + useMutation
 
 ```js
 // users-service/src/routes.js
@@ -1267,4 +1268,57 @@ static async deleteUserSession({ sessionId }) {
   const body = await got.delete(`${USERS_SERVICE_URI}/sessions/${sessionId}`, { json: { sessionId } }).json();
   return body;
 }
+
+
+// ------------
+// src/components/AccountDetails/Account
+const mutation = gql`
+  mutation($sessionId: !ID) {
+    deleteUserSession(sessionId: $sessionId)
+  }
+`;
+
+const LogoutLink = styled.a.attrs({ href: '#' })`
+  color: blue;
+  display: block;
+  margin-top: 0.25rem;
+`;
+
+const Account = () => {
+  const dispatch = useDispatch();
+  const [deleteUserSession] = useMutation(mutation);
+  const session = useSelector(state => state.session);
+  return (
+    <Wrapper>
+      Logged in as <Email>{session.user.email}</Email>
+      <LogoutLink
+        onClick={evt => {
+          evt.preventDefault();
+          dispatch(clearSession());
+          deleteUserSession({ variables: { sessionId: session.id } });
+        }}
+      >
+        (登出)
+      </LogoutLink>
+    </Wrapper>
+  );
+};
+```
+
+> 不管是 graphQL、样式容器、组件全是函数，一点念想都没有。
+
+### 修复正确登录更新 redux
+
+```js
+const onSubmit = handleSubmit(async ({ email, password }) => {
+  const {
+    data: { createUserSession: createdSession },
+  } = await createUserSession({
+    variables: {
+      email,
+      password,
+    },
+  });
+  dispatch(setSession(createdSession));
+});
 ```
