@@ -1392,4 +1392,33 @@ const SignUp = ({ onChangeToLogin: pushChangeToLogin }) => {
 };
 ```
 
+## Part Ⅸ
+
 > GraphQL 里 mutation 参数里 String 和 String! 都要校验一致性！
+
+## Part X 部署
+
+### 改造网关的环境变量
+
+```yml
+version: "3"
+services:
+  api-gateway:
+    build: "./api-gateway"
+    depends_on:
+      - users-service
+      - listings-service
+    environment:
+      - USERS_SERVICE_URI=http://users-service:7101
+      - LISTINGS_SERVOCE_URI=http://listings-service:7100
+    ports:
+      - 7000:7000
+    volumes:
+      - ./api-gateway:/opt/app
+```
+
+```js
+// api-gateway/src/adapters/ListingsService.js
+import accessEnv from '#root/helpers/accessEnv';
+const LISTINGS_SERVOCE_URI = accessEnv('LISTINGS_SERVOCE_URI');
+```

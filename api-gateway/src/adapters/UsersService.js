@@ -1,7 +1,9 @@
 import _got from 'got';
-const got = _got.extend({ retry: 0, responseType: 'json' }); //! responseType 竟ß没用？
+import accessEnv from '#root/helpers/accessEnv';
 
-const USERS_SERVICE_URI = 'http://users-service:7101';
+const got = _got.extend({ retry: 0, responseType: 'json' }); //! responseType 竟没用？
+
+const USERS_SERVICE_URI = accessEnv('USERS_SERVICE_URI');
 
 export default class UsersService {
   static async createUser({ email, password }) {

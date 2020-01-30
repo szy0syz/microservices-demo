@@ -1,6 +1,9 @@
-import got from 'got';
+import _got from 'got';
+import accessEnv from '#root/helpers/accessEnv';
 
-const LISTINGS_SERVOCE_URI = 'http://listings-service:7100';
+const got = _got.extend({ retry: 0, responseType: 'json' });
+
+const LISTINGS_SERVOCE_URI = accessEnv('LISTINGS_SERVOCE_URI');
 
 export default class ListingsService {
   static async fetchAllListings() {

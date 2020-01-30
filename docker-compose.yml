@@ -5,6 +5,9 @@ services:
     depends_on:
       - users-service
       - listings-service
+    environment:
+      - USERS_SERVICE_URI=http://users-service:7101
+      - LISTINGS_SERVOCE_URI=http://listings-service:7100
     ports:
       - 7000:7000
     volumes:
