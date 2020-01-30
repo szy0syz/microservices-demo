@@ -1391,3 +1391,5 @@ const SignUp = ({ onChangeToLogin: pushChangeToLogin }) => {
   );
 };
 ```
+
+> GraphQL 里 mutation 参数里 String 和 String! 都要校验一致性！

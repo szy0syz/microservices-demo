@@ -1,7 +1,9 @@
 import React from 'react';
 import gql from 'graphql-tag';
-import { useQuery } from '@apollo/react-hooks';
 import styled from 'styled-components';
+import { useQuery } from '@apollo/react-hooks';
+
+import AddListing from './AddListing';
 
 const Description = styled.p`
   margin-bottom: 0;
@@ -32,18 +34,21 @@ const query = gql`
 `;
 
 const Listings = () => {
-  const { data, loading } = useQuery(query);
+  const { data, loading, refetch } = useQuery(query);
 
   if (loading) return 'Loading...';
 
   return (
     <div>
-      {data.listings.map(listing => (
-        <Listing key={listing.id}>
-          <Title>{listing.title}</Title>
-          <Description>{listing.description}</Description>
-        </Listing>
-      ))}
+      <div>
+        {data.listings.map(listing => (
+          <Listing key={listing.id}>
+            <Title>{listing.title}</Title>
+            <Description>{listing.description}</Description>
+          </Listing>
+        ))}
+      </div>
+      <AddListing onAddLinting={() => { refetch() }}/>
     </div>
   );
 };

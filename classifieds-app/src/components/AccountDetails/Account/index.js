@@ -42,7 +42,7 @@ const Account = () => {
           deleteUserSession({ variables: { sessionId: session.id } });
         }}
       >
-        (登出)
+        (Logout)
       </LogoutLink>
     </Wrapper>
   );
